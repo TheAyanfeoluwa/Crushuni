@@ -1,0 +1,194 @@
+:root {
+  /* Color Palette - Based on Light/Purple Theme */
+
+  /* Primary - Purple Spectrum */
+  --color-primary-20: #EBF3FF;
+  --color-primary-30: #D5E5FB;
+  --color-primary-40: #AFCEF8;
+  --color-primary-50: #1E6DF6;
+  /* Vivid Blue-Purple */
+  --color-primary-60: #0947D7;
+  --color-primary-70: #0C29AB;
+  --color-primary-80: #091E7C;
+
+  /* Semantic Aliases */
+  --color-primary: #6C31F5;
+  /* Main Brand Purple */
+  --color-primary-light: #A78BFA;
+  --color-primary-dark: #5B21D6;
+  --color-primary-subtle: #F3E8FF;
+
+  /* Backgrounds */
+  --color-bg-main: #FFFFFF;
+  --color-bg-surface: #F8F5FF;
+  --color-bg-surface-hover: #F3E8FF;
+
+  /* Modern Tech Gradients */
+  --gradient-tech: linear-gradient(135deg, #F0F4FF 0%, #F5F3FF 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+  --gradient-border: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(108, 49, 245, 0.1) 100%);
+
+  /* Text */
+  --color-text-main: #0F172A;
+  /* Slate 900 */
+  --color-text-muted: #64748B;
+  /* Slate 500 */
+  --color-text-light: #FFFFFF;
+
+  /* State Colors */
+  --color-destructive: #EF4444;
+  --color-success: #10B981;
+  --color-alert: #F59E0B;
+
+  /* Borders */
+  --color-border: #E2E8F0;
+
+  /* Typography */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 20px rgba(108, 49, 245, 0.25);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-heading);
+  border: none;
+  background: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+/* Utilities */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(108, 49, 245, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(108, 49, 245, 0.4);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-text-muted);
+  background-color: var(--color-bg-surface);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-card);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary), #4F46E5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animation Utilities */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+}
