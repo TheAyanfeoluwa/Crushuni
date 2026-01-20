@@ -164,7 +164,7 @@ async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_c
         client = genai.Client(api_key=GENAI_API_KEY)
         prompt = f"Context: {request.context}\n\nUser: {request.message}\n\nAssistant:"
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=prompt
+            model='gemini-2.5-flash', contents=prompt
         )
         return {"response": response.text}
     except Exception as e:
@@ -211,7 +211,7 @@ async def generate_flashcards(
         """ 
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=prompt
+            model='gemini-2.5-flash', contents=prompt
         )
         generated_text = response.text
         
@@ -315,7 +315,7 @@ async def generate_concept(
         """
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=prompt
+            model='gemini-2.5-flash', contents=prompt
         )
         summary_text = response.text
         

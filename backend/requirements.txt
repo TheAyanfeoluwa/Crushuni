@@ -11,3 +11,4 @@ psycopg2-binary
 passlib
 bcrypt==3.2.2
 python-jose[cryptography]
+python-multipart
