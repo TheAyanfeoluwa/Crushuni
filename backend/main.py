@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text
 from pydantic import BaseModel, Field
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import Optional
@@ -33,8 +33,7 @@ app.add_middleware(
 
 # --- Configuration ---
 GENAI_API_KEY = os.getenv("GENAI_API_KEY")
-if GENAI_API_KEY:
-    genai.configure(api_key=GENAI_API_KEY)
+
 
 SECRET_KEY = os.getenv("SECRET_KEY", "YOUR_SUPER_SECRET_KEY_HERE")
 ALGORITHM = "HS256"
@@ -162,9 +161,11 @@ async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_c
         raise HTTPException(status_code=500, detail="Gemini API Key not configured")
     
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        client = genai.Client(api_key=GENAI_API_KEY)
         prompt = f"Context: {request.context}\n\nUser: {request.message}\n\nAssistant:"
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', contents=prompt
+        )
         return {"response": response.text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -194,7 +195,7 @@ async def generate_flashcards(
              raise HTTPException(status_code=400, detail="No file or text provided")
         
         # 2. Call Gemini
-        model = genai.GenerativeModel('gemini-pro')
+        client = genai.Client(api_key=GENAI_API_KEY)
         prompt = f"""
         You are an expert tutor. Create exactly {num_cards} flashcards based ONLY on the text provided below within the <source_text> tags.
         
@@ -209,7 +210,9 @@ async def generate_flashcards(
         </source_text>
         """ 
         
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', contents=prompt
+        )
         generated_text = response.text
         
         # 3. Parse Response
@@ -290,7 +293,7 @@ async def generate_concept(
         else:
              raise HTTPException(status_code=400, detail="No file or text provided")
 
-        model = genai.GenerativeModel('gemini-pro')
+        client = genai.Client(api_key=GENAI_API_KEY)
         prompt = f"""
         You are an expert academic summarizer. Extract the core concepts based ONLY on the text provided below within the <source_text> tags.
         
@@ -311,7 +314,9 @@ async def generate_concept(
         </source_text>
         """
         
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', contents=prompt
+        )
         summary_text = response.text
         
         # LINK TO USER
