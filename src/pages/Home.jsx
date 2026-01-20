@@ -58,7 +58,7 @@ const HeroSection = () => {
 
     return (
         <section style={{
-            paddingTop: '9rem',
+            paddingTop: '5rem',
             paddingBottom: '4rem',
             position: 'relative',
             overflow: 'hidden',
