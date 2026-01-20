@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, sta
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, joinedload
-from pydantic import BaseModel
+from sqlalchemy import text
+from pydantic import BaseModel, Field
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -90,7 +91,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 # --- Pydantic Models ---
 class UserCreate(BaseModel):
     email: str
-    password: str
+    password: str = Field(..., min_length=8)
     full_name: str
 
 class UserLogin(BaseModel):
@@ -146,6 +147,15 @@ def read_users_me(current_user: User = Depends(get_current_user)):
 def read_root():
     return {"message": "CrushUni Backend is Running"}
 
+@app.get("/heartbeat")
+def heartbeat(db: Session = Depends(get_db)):
+    try:
+        # Run a simple query to keep the connection active
+        db.execute(text("SELECT 1"))
+        return {"status": "alive", "database": "connected"}
+    except Exception as e:
+        return {"status": "alive", "database": "error", "details": str(e)}
+
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_current_user)):
     if not GENAI_API_KEY:
@@ -186,7 +196,7 @@ async def generate_flashcards(
         # 2. Call Gemini
         model = genai.GenerativeModel('gemini-pro')
         prompt = f"""
-        You are an expert tutor. Create exactly {num_cards} flashcards from the following text.
+        You are an expert tutor. Create exactly {num_cards} flashcards based ONLY on the text provided below within the <source_text> tags.
         
         Strictly follow this format for every card:
         Q: [Question] | A: [Answer]
@@ -194,8 +204,9 @@ async def generate_flashcards(
         
         Use '###' as a separator between cards. Do not include any intro or outro text.
         
-        Text to process:
+        <source_text>
         {content_text[:30000]} 
+        </source_text>
         """ 
         
         response = model.generate_content(prompt)
@@ -281,7 +292,7 @@ async def generate_concept(
 
         model = genai.GenerativeModel('gemini-pro')
         prompt = f"""
-        You are an expert academic summarizer. Extract the core concepts from the following text.
+        You are an expert academic summarizer. Extract the core concepts based ONLY on the text provided below within the <source_text> tags.
         
         Provide a structured summary with the following HTML-compatible format (using simple markers):
         
@@ -295,8 +306,9 @@ async def generate_concept(
         
         (Repeat for major concepts)
         
-        Text to process:
+        <source_text>
         {source_text[:30000]}
+        </source_text>
         """
         
         response = model.generate_content(prompt)

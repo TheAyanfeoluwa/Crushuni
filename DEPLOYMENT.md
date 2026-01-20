@@ -80,4 +80,16 @@ Sync the deployment configurations we just made:
 3.  Update the `ALLOWED_ORIGINS` environment variable to match your Cloudflare URL (e.g., `https://curshuni.pages.dev`).
 4.  **Redeploy** Koyeb to apply changes.
 
+---
+
+## 6. Keep-Alive (Prevent Pausing)
+
+To prevent your free-tier Supabase database and Koyeb instance from sleeping:
+
+1.  Use a free uptime monitor (like **Cron-Job.org** or **UptimeRobot**).
+2.  Create a job that pings your backend URL:
+    `https://curshuni-backend-xyz.koyeb.app/heartbeat`
+3.  Set the interval to **every 15 minutes**.
+4.  This endpoint runs a lightweight database query, keeping both your backend and database active.
+
 **Done!** Your app is now live.

@@ -106,7 +106,7 @@ const HeroSection = () => {
                         lineHeight: 1.6
                     }}
                 >
-                    The all-in-one AI study assistant. Generate flashcards, extract concepts, and chat with your notes. 100% Free for students.
+                    The all-in-one AI study assistant. Generate flashcards, extract concepts, and chat with your notes. Free Forever for students.
                 </motion.p>
 
                 <motion.div
@@ -350,25 +350,7 @@ const FeaturesSection = () => {
                             position: 'relative',
                             boxShadow: 'inset 0 0 60px rgba(0,0,0,0.3)'
                         }}>
-                            <div style={{ position: 'relative', zIndex: 10, maxWidth: '60%' }}>
-                                <div style={{
-                                    background: 'rgba(255, 255, 255, 0.15)', color: '#BFDBFE', // Light Blue text
-                                    padding: '0.5rem 1rem', borderRadius: '99px',
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                                    marginBottom: '1.5rem', fontWeight: '600',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)'
-                                }}>
-                                    <Shield size={16} />
-                                    <span>Student Safety Pledge</span>
-                                </div>
-                                <h3 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: 1.1, color: 'white' }}>
-                                    Forever Free. <br />
-                                    <span style={{ color: '#60A5FA' }}>No Credit Card.</span>
-                                </h3>
-                                <p style={{ fontSize: '1.1rem', opacity: 0.9, maxWidth: '500px', lineHeight: 1.6, color: '#DBEAFE' }}>
-                                    We believe education is a right. CrushUni is supported by optional institutional partnerships, never by students.
-                                </p>
-                            </div>
+
 
                             {/* Heroic Free Visual - Blue/White Theme */}
                             <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
