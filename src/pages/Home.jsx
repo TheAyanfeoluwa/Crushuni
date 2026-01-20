@@ -340,31 +340,7 @@ const FeaturesSection = () => {
                         <FlipFlashcard />
                     </BentoCard>
 
-                    {/* Card 4: Redesigned Free Badge (FULL WIDTH) - High Contrast Version */}
-                    <BentoCard delay={0.3} style={{ gridColumn: 'span 3', overflow: 'hidden' }}>
-                        <div style={{
-                            height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            background: 'linear-gradient(135deg, #172554 0%, #1E40AF 100%)', // Deep Blue to Blue-700
-                            color: 'white',
-                            padding: '3rem',
-                            position: 'relative',
-                            boxShadow: 'inset 0 0 60px rgba(0,0,0,0.3)'
-                        }}>
 
-
-                            {/* Heroic Free Visual - Blue/White Theme */}
-                            <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ position: 'absolute', inset: 0, border: '2px dashed rgba(96, 165, 250, 0.3)', borderRadius: '50%', animation: 'spin 10s linear infinite' }} />
-                                <div style={{ position: 'absolute', inset: '20px', border: '2px solid rgba(96, 165, 250, 0.5)', borderRadius: '50%' }} />
-                                <div style={{ fontSize: '4rem', fontWeight: '800', textShadow: '0 0 40px rgba(96, 165, 250, 0.5)', color: '#60A5FA' }}>$0</div>
-                            </div>
-
-                            <style dangerouslySetInnerHTML={{
-                                __html: `
-                                @keyframes spin { 100% { transform: rotate(360deg); } }
-                             `}} />
-                        </div>
-                    </BentoCard>
 
                 </div>
             </div>
