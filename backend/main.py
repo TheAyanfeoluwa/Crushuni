@@ -172,8 +172,8 @@ async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_c
 
 @app.post("/api/flashcards/generate")
 async def generate_flashcards(
-    file: UploadFile = File(None),
-    text_input: str = Form(None),
+    file: Optional[UploadFile] = File(None),
+    text_input: Optional[str] = Form(None),
     num_cards: int = Form(...),
     title: str = Form(...),
     category: str = Form(...),
@@ -271,8 +271,8 @@ async def extract_content(file: UploadFile = File(...), current_user: User = Dep
 
 @app.post("/api/concepts/generate")
 async def generate_concept(
-    file: UploadFile = File(None),
-    text_input: str = Form(None), 
+    file: Optional[UploadFile] = File(None),
+    text_input: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
