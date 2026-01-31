@@ -2,9 +2,9 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    // Note: Don't set Content-Type here. Axios auto-detects:
+    // - application/json for JSON data
+    // - multipart/form-data for FormData (file uploads)
 });
 
 // Request interceptor to add token
