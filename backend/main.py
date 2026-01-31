@@ -244,7 +244,8 @@ async def generate_flashcards(
         return {"deck_id": created_deck.id, "message": "Deck created successfully"}
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/decks")
