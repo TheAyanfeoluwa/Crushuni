@@ -8,7 +8,6 @@ import os
 from google import genai
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 
@@ -57,7 +56,7 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -162,18 +161,20 @@ async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_c
     
     try:
         client = genai.Client(api_key=GENAI_API_KEY)
-        prompt = f"Context: {request.context}\n\nUser: {request.message}\n\nAssistant:"
         response = client.models.generate_content(
-            model='gemini-2.5-flash', contents=prompt
+            model='gemini-2.0-flash', contents=request.message,
+            config={'system_instruction': request.context}
         )
         return {"response": response.text}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/flashcards/generate")
 async def generate_flashcards(
-    file: Optional[UploadFile] = File(None),
-    text_input: Optional[str] = Form(None),
+    file: UploadFile | None = File(None),
+    text_input: str | None = Form(None),
     num_cards: int = Form(...),
     title: str = Form(...),
     category: str = Form(...),
@@ -196,6 +197,7 @@ async def generate_flashcards(
         
         # 2. Call Gemini
         client = genai.Client(api_key=GENAI_API_KEY)
+        
         prompt = f"""
         You are an expert tutor. Create exactly {num_cards} flashcards based ONLY on the text provided below within the <source_text> tags.
         
@@ -211,7 +213,7 @@ async def generate_flashcards(
         """ 
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash', contents=prompt
+            model='gemini-2.0-flash', contents=prompt
         )
         generated_text = response.text
         
@@ -271,8 +273,8 @@ async def extract_content(file: UploadFile = File(...), current_user: User = Dep
 
 @app.post("/api/concepts/generate")
 async def generate_concept(
-    file: Optional[UploadFile] = File(None),
-    text_input: Optional[str] = Form(None),
+    file: UploadFile | None = File(None),
+    text_input: str | None = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -294,6 +296,7 @@ async def generate_concept(
              raise HTTPException(status_code=400, detail="No file or text provided")
 
         client = genai.Client(api_key=GENAI_API_KEY)
+       
         prompt = f"""
         You are an expert academic summarizer. Extract the core concepts based ONLY on the text provided below within the <source_text> tags.
         
@@ -315,7 +318,7 @@ async def generate_concept(
         """
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash', contents=prompt
+            model='gemini-2.0-flash', contents=prompt
         )
         summary_text = response.text
         
