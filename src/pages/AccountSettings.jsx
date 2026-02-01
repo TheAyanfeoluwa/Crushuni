@@ -63,15 +63,14 @@ const AccountSettings = () => {
             </div>
 
             <SettingsSection title="Profile Information" icon={User}>
-                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-                            <InputGroup label="Full Name" defaultValue={user?.full_name || ''} />
-                        </div>
-                        <InputGroup label="Email Address" type="email" defaultValue={user?.email || ''} />
-                        <div style={{ marginTop: '1rem' }}>
-                            <button className="btn btn-primary">Save Changes</button>
-                        </div>
+                <div style={{ flex: 1 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <InputGroup label="First Name" defaultValue={user?.first_name || ''} />
+                        <InputGroup label="Last Name" defaultValue={user?.last_name || ''} />
+                    </div>
+                    <InputGroup label="Email Address" type="email" defaultValue={user?.email || ''} />
+                    <div style={{ marginTop: '1rem' }}>
+                        <button className="btn btn-primary">Save Changes</button>
                     </div>
                 </div>
             </SettingsSection>

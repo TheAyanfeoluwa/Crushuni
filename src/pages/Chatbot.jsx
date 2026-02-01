@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
-import { Send, Bot, FileText, Sparkles, MoreHorizontal, Maximize2, UploadCloud } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Bot, FileText, Sparkles, MoreHorizontal, Maximize2, UploadCloud, ZoomIn, ZoomOut, RotateCw, Download, X } from 'lucide-react';
 import api from '../lib/axios';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 const Chatbot = () => {
     // Unique Design Idea: "Split Context"
@@ -18,6 +19,27 @@ const Chatbot = () => {
     const [contextFile, setContextFile] = useState(null);
     const [contextText, setContextText] = useState("");
     const [isUploading, setIsUploading] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const [pdfZoom, setPdfZoom] = useState(100);
+
+    const messagesEndRef = useRef(null);
+    const chatContainerRef = useRef(null);
+
+    // Auto-scroll to bottom when new messages arrive (only within chat container)
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    // Cleanup blob URL on unmount or file change
+    useEffect(() => {
+        return () => {
+            if (pdfUrl) {
+                URL.revokeObjectURL(pdfUrl);
+            }
+        };
+    }, [pdfUrl]);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files?.[0];
@@ -25,6 +47,18 @@ const Chatbot = () => {
 
         setIsUploading(true);
         setContextFile(file);
+
+        // Clean up previous PDF URL
+        if (pdfUrl) {
+            URL.revokeObjectURL(pdfUrl);
+            setPdfUrl(null);
+        }
+
+        // Create blob URL for PDF files
+        if (file.type === 'application/pdf') {
+            const blobUrl = URL.createObjectURL(file);
+            setPdfUrl(blobUrl);
+        }
 
         const formData = new FormData();
         formData.append("file", file);
@@ -34,16 +68,27 @@ const Chatbot = () => {
             setContextText(response.data.text);
             setMessages(prev => [...prev, {
                 role: 'system',
-                content: `I've analyzed "${file.name}". I'm now ready to answer questions based on this document.`
+                content: `I've analyzed **"${file.name}"**. I'm now ready to answer questions based on this document. Feel free to ask me anything!`
             }]);
 
         } catch (error) {
             console.error(error);
             setContextFile(null);
+            setPdfUrl(null);
             alert("Failed to analyze file.");
         } finally {
             setIsUploading(false);
         }
+    };
+
+    const handleRemoveFile = () => {
+        if (pdfUrl) {
+            URL.revokeObjectURL(pdfUrl);
+        }
+        setContextFile(null);
+        setContextText("");
+        setPdfUrl(null);
+        setPdfZoom(100);
     };
 
     const handleSend = async () => {
@@ -72,8 +117,13 @@ const Chatbot = () => {
     };
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter') handleSend();
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
     };
+
+    const isPdf = contextFile?.type === 'application/pdf' || contextFile?.name?.toLowerCase().endsWith('.pdf');
 
     return (
         <div style={{ height: 'calc(100vh - 4rem)', display: 'flex', gap: '1rem', paddingBottom: '1rem' }}>
@@ -89,7 +139,7 @@ const Chatbot = () => {
                 overflow: 'hidden'
             }}>
                 <div style={{
-                    padding: '1rem',
+                    padding: '0.75rem 1rem',
                     borderBottom: '1px solid var(--color-border)',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -102,28 +152,62 @@ const Chatbot = () => {
                             {contextFile ? contextFile.name : "No Document Selected"}
                         </span>
                     </div>
+                    {contextFile && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {isPdf && (
+                                <>
+                                    <button
+                                        onClick={() => setPdfZoom(z => Math.max(50, z - 25))}
+                                        style={{ padding: '0.25rem', borderRadius: '4px', color: 'var(--color-text-muted)' }}
+                                        title="Zoom Out"
+                                    >
+                                        <ZoomOut size={16} />
+                                    </button>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', minWidth: '40px', textAlign: 'center' }}>
+                                        {pdfZoom}%
+                                    </span>
+                                    <button
+                                        onClick={() => setPdfZoom(z => Math.min(200, z + 25))}
+                                        style={{ padding: '0.25rem', borderRadius: '4px', color: 'var(--color-text-muted)' }}
+                                        title="Zoom In"
+                                    >
+                                        <ZoomIn size={16} />
+                                    </button>
+                                    <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--color-border)', margin: '0 0.25rem' }} />
+                                </>
+                            )}
+                            <button
+                                onClick={handleRemoveFile}
+                                style={{ padding: '0.25rem', borderRadius: '4px', color: '#DC2626' }}
+                                title="Remove File"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div style={{
                     flex: 1,
-                    padding: '2rem',
-                    backgroundColor: '#F9FAFB',
+                    backgroundColor: isPdf && pdfUrl ? '#525659' : '#F9FAFB',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--color-text-muted)',
-                    position: 'relative'
+                    justifyContent: contextFile ? 'flex-start' : 'center',
+                    position: 'relative',
+                    overflow: 'hidden'
                 }}>
-                    {!contextText ? (
-                        <div style={{ textAlign: 'center' }}>
+                    {!contextFile ? (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
                             <div style={{
                                 width: '100%',
                                 padding: '2rem',
                                 border: '2px dashed var(--color-border)',
                                 borderRadius: 'var(--radius-md)',
                                 cursor: 'pointer',
-                                position: 'relative'
+                                position: 'relative',
+                                transition: 'all 0.2s',
+                                backgroundColor: 'white'
                             }}>
                                 <input
                                     type="file"
@@ -132,30 +216,65 @@ const Chatbot = () => {
                                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
                                 />
                                 {isUploading ? (
-                                    <div className="animate-pulse">Analyzing Document...</div>
+                                    <div className="animate-pulse" style={{ color: 'var(--color-primary)' }}>
+                                        <RotateCw size={32} className="animate-spin" style={{ margin: '0 auto 0.5rem auto' }} />
+                                        Analyzing Document...
+                                    </div>
                                 ) : (
                                     <>
                                         <UploadCloud size={32} style={{ margin: '0 auto 0.5rem auto', color: 'var(--color-primary)' }} />
-                                        <p style={{ fontWeight: '600' }}>Click to Upload Context</p>
-                                        <p style={{ fontSize: '0.8rem' }}>PDF, DOCX, TXT</p>
+                                        <p style={{ fontWeight: '600', color: 'var(--color-text-main)' }}>Click to Upload Context</p>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>PDF, DOCX, TXT</p>
                                     </>
                                 )}
                             </div>
                         </div>
+                    ) : isPdf && pdfUrl ? (
+                        // Embedded PDF Viewer - hide browser toolbar, use CSS transform for zoom
+                        <div style={{
+                            width: '100%',
+                            height: '100%',
+                            overflow: 'auto',
+                            backgroundColor: '#525659'
+                        }}>
+                            <div style={{
+                                width: pdfZoom >= 100 ? `${pdfZoom}%` : '100%',
+                                height: pdfZoom >= 100 ? `${pdfZoom}%` : '100%',
+                                minWidth: '100%',
+                                minHeight: '100%',
+                                transform: pdfZoom < 100 ? `scale(${pdfZoom / 100})` : 'none',
+                                transformOrigin: 'top left'
+                            }}>
+                                <iframe
+                                    key={pdfUrl} // Stable key based on URL, not zoom
+                                    src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        border: 'none',
+                                        backgroundColor: 'white'
+                                    }}
+                                    title="PDF Viewer"
+                                />
+                            </div>
+                        </div>
                     ) : (
+                        // Text/Other file viewer with Markdown support
                         <div style={{
                             width: '100%',
                             height: '100%',
                             overflowY: 'auto',
-                            textAlign: 'left',
-                            fontSize: '0.85rem',
-                            whiteSpace: 'pre-wrap',
-                            padding: '1rem',
-                            backgroundColor: 'white',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)'
+                            padding: '1.5rem',
                         }}>
-                            {contextText}
+                            <div style={{
+                                backgroundColor: 'white',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--color-border)',
+                                padding: '1.5rem',
+                                minHeight: '100%'
+                            }}>
+                                <MarkdownRenderer content={contextText} />
+                            </div>
                         </div>
                     )}
                 </div>
@@ -196,7 +315,8 @@ const Chatbot = () => {
                     </div>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                <div ref={chatContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {messages.map((msg, i) => (
                         <div key={i} style={{
                             alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
@@ -210,7 +330,17 @@ const Chatbot = () => {
                                 boxShadow: 'var(--shadow-sm)',
                                 lineHeight: '1.5'
                             }}>
-                                {msg.content}
+                                {msg.role === 'user' ? (
+                                    msg.content
+                                ) : (
+                                    <MarkdownRenderer
+                                        content={msg.content}
+                                        style={{
+                                            fontSize: '0.95rem',
+                                            color: 'inherit'
+                                        }}
+                                    />
+                                )}
                             </div>
                             <div style={{
                                 fontSize: '0.75rem',
@@ -223,7 +353,14 @@ const Chatbot = () => {
                             </div>
                         </div>
                     ))}
-                    {isLoading && <div style={{ alignSelf: 'flex-start', color: 'var(--color-text-muted)', fontStyle: 'italic', marginLeft: '1rem' }}>Typing...</div>}
+                    {isLoading && (
+                        <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)', marginLeft: '1rem' }}>
+                            <div className="typing-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    )}
+                    <div ref={messagesEndRef} />
                 </div>
 
                 <div style={{ padding: '1.25rem', borderTop: '1px solid var(--color-border)' }}>
@@ -273,8 +410,35 @@ const Chatbot = () => {
                 </div>
             </div>
 
+            <style>{`
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+                .animate-spin { animation: spin 1s linear infinite; }
+                .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+                
+                .typing-dots {
+                    display: flex;
+                    gap: 4px;
+                }
+                .typing-dots span {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background-color: var(--color-primary);
+                    animation: typing 1.4s infinite ease-in-out both;
+                }
+                .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+                .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+                .typing-dots span:nth-child(3) { animation-delay: 0s; }
+                @keyframes typing {
+                    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+                    40% { transform: scale(1); opacity: 1; }
+                }
+            `}</style>
+
         </div>
     );
 };
 
 export default Chatbot;
+

@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
 import FAQ from './pages/FAQ';
@@ -63,6 +64,7 @@ function App() {
     <AuthProvider>
       <LayoutProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingLayout><Home /></LandingLayout>} />

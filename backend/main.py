@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 
-from database import SessionLocal, engine, init_db, Deck, Flashcard, Concept, User
+from database import SessionLocal, engine, init_db, Deck, Flashcard, Concept, User, StudyActivity
 from file_processing import extract_text_from_file
 #I just added this line to test git
 load_dotenv()
@@ -90,7 +90,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 class UserCreate(BaseModel):
     email: str
     password: str = Field(..., min_length=8)
-    full_name: str
+    first_name: str
+    last_name: str
 
 class UserLogin(BaseModel):
     email: str
@@ -114,13 +115,13 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     hashed_password = get_password_hash(user.password)
-    new_user = User(email=user.email, full_name=user.full_name, hashed_password=hashed_password)
+    new_user = User(email=user.email, first_name=user.first_name, last_name=user.last_name, hashed_password=hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
     access_token = create_access_token(data={"sub": new_user.email})
-    return {"access_token": access_token, "token_type": "bearer", "user_name": new_user.full_name}
+    return {"access_token": access_token, "token_type": "bearer", "user_name": new_user.first_name}
 
 @app.post("/api/auth/login", response_model=Token)
 def login(user_data: UserLogin, db: Session = Depends(get_db)):
@@ -129,14 +130,15 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "user_name": user.full_name}
+    return {"access_token": access_token, "token_type": "bearer", "user_name": user.first_name or user.email.split('@')[0]}
 
 @app.get("/api/auth/me")
 def read_users_me(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "email": current_user.email,
-        "full_name": current_user.full_name
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name
     }
 
 # --- Core API (Secured) ---
@@ -162,7 +164,7 @@ async def chat_endpoint(request: ChatRequest, current_user: User = Depends(get_c
     try:
         client = genai.Client(api_key=GENAI_API_KEY)
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=request.message,
+            model='gemini-2.5-flash', contents=request.message,
             config={'system_instruction': request.context}
         )
         return {"response": response.text}
@@ -213,7 +215,7 @@ async def generate_flashcards(
         """ 
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=prompt
+            model='gemini-2.5-flash', contents=prompt
         )
         generated_text = response.text
         
@@ -319,7 +321,7 @@ async def generate_concept(
         """
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash', contents=prompt
+            model='gemini-2.5-flash', contents=prompt
         )
         summary_text = response.text
         
@@ -346,12 +348,109 @@ def get_concept(concept_id: int, db: Session = Depends(get_db), current_user: Us
         raise HTTPException(status_code=404, detail="Concept not found")
     return concept
 
+# --- Study Activity API ---
+
+class StudyLogRequest(BaseModel):
+    deck_id: int
+    cards_reviewed: int
+    easy_count: int = 0
+    hard_count: int = 0
+
+@app.post("/api/study/log")
+def log_study_activity(request: StudyLogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    from datetime import date
+    today = date.today()
+    
+    # Check if there's already an activity for this deck today
+    existing = db.query(StudyActivity).filter(
+        StudyActivity.user_id == current_user.id,
+        StudyActivity.deck_id == request.deck_id,
+        StudyActivity.activity_date == today
+    ).first()
+    
+    if existing:
+        # Update existing record
+        existing.cards_reviewed += request.cards_reviewed
+        existing.easy_count += request.easy_count
+        existing.hard_count += request.hard_count
+    else:
+        # Create new activity record
+        new_activity = StudyActivity(
+            user_id=current_user.id,
+            deck_id=request.deck_id,
+            activity_date=today,
+            cards_reviewed=request.cards_reviewed,
+            easy_count=request.easy_count,
+            hard_count=request.hard_count
+        )
+        db.add(new_activity)
+    
+    db.commit()
+    return {"message": "Study activity logged successfully"}
+
+def calculate_study_streak(db: Session, user_id: int) -> int:
+    from datetime import date, timedelta
+    from sqlalchemy import func
+    
+    # Get distinct study dates for user, ordered by date descending
+    study_dates = db.query(func.distinct(StudyActivity.activity_date)).filter(
+        StudyActivity.user_id == user_id
+    ).order_by(StudyActivity.activity_date.desc()).all()
+    
+    if not study_dates:
+        return 0
+    
+    study_dates = [d[0] for d in study_dates]
+    today = date.today()
+    
+    # Check if user studied today or yesterday (allow 1 day grace)
+    if study_dates[0] != today and study_dates[0] != today - timedelta(days=1):
+        return 0
+    
+    # Count consecutive days
+    streak = 0
+    expected_date = study_dates[0]
+    
+    for study_date in study_dates:
+        if study_date == expected_date:
+            streak += 1
+            expected_date = study_date - timedelta(days=1)
+        elif study_date < expected_date:
+            break
+    
+    return streak
+
 @app.get("/api/dashboard")
 def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    from datetime import date, timedelta
+    from sqlalchemy import func
+    
     # Filter ALL stats by user_id
     deck_count = db.query(Deck).filter(Deck.user_id == current_user.id).count()
     flashcard_count = db.query(Flashcard).join(Deck).filter(Deck.user_id == current_user.id).count()
     concept_count = db.query(Concept).filter(Concept.user_id == current_user.id).count()
+    
+    # Calculate real study streak
+    study_streak = calculate_study_streak(db, current_user.id)
+    
+    # Calculate weekly trends
+    today = date.today()
+    week_ago = today - timedelta(days=7)
+    two_weeks_ago = today - timedelta(days=14)
+    
+    # Cards reviewed this week vs last week
+    this_week_cards = db.query(func.coalesce(func.sum(StudyActivity.cards_reviewed), 0)).filter(
+        StudyActivity.user_id == current_user.id,
+        StudyActivity.activity_date >= week_ago
+    ).scalar() or 0
+    
+    last_week_cards = db.query(func.coalesce(func.sum(StudyActivity.cards_reviewed), 0)).filter(
+        StudyActivity.user_id == current_user.id,
+        StudyActivity.activity_date >= two_weeks_ago,
+        StudyActivity.activity_date < week_ago
+    ).scalar() or 0
+    
+    cards_trend = int(this_week_cards) - int(last_week_cards)
     
     recent_decks = db.query(Deck).filter(Deck.user_id == current_user.id).order_by(Deck.created_at.desc()).limit(3).all()
     recent_concepts = db.query(Concept).filter(Concept.user_id == current_user.id).order_by(Concept.created_at.desc()).limit(3).all()
@@ -361,8 +460,9 @@ def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = De
             "total_decks": deck_count,
             "total_flashcards": flashcard_count,
             "total_concepts": concept_count,
-            "study_streak": 1, # Placeholder
-            "consistency_score": 100
+            "study_streak": study_streak,
+            "cards_trend": cards_trend,
+            "consistency_score": min(100, study_streak * 15) if study_streak > 0 else 0
         },
         "recent_activity": {
              "decks": recent_decks,
@@ -373,3 +473,4 @@ def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = De
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

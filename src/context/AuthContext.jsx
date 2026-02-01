@@ -42,12 +42,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (fullName, email, password) => {
+    const register = async (firstName, lastName, email, password) => {
         try {
             const { data } = await api.post('/auth/register', {
                 email,
                 password,
-                full_name: fullName
+                first_name: firstName,
+                last_name: lastName
             });
             localStorage.setItem('token', data.access_token);
             // Fetch validation immediately
@@ -75,3 +76,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+

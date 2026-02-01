@@ -32,7 +32,7 @@ const StatCard = ({ label, value, icon: Icon, color, trend }) => (
     </motion.div>
 );
 
-const ActivityItem = ({ icon: Icon, title, time, type }) => (
+const ActivityItem = ({ icon: Icon, title, time, type, id, itemType, onReview }) => (
     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--color-border)' }}>
         <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
             <Icon size={20} />
@@ -41,7 +41,29 @@ const ActivityItem = ({ icon: Icon, title, time, type }) => (
             <h4 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{title}</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{type} • {time}</p>
         </div>
-        <button style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid var(--color-border)', background: 'white', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer' }}>
+        <button
+            onClick={() => onReview(id, itemType)}
+            style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border)',
+                background: 'white',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.borderColor = 'var(--color-primary)';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = 'inherit';
+                e.currentTarget.style.borderColor = 'var(--color-border)';
+            }}
+        >
             Review
         </button>
     </div>
@@ -83,12 +105,20 @@ const DashboardOverview = () => {
         }
     };
 
+    const handleReview = (id, itemType) => {
+        if (itemType === 'deck') {
+            navigate(`/app/flashcards/study/${id}`);
+        } else if (itemType === 'concept') {
+            navigate(`/app/extractor/view/${id}`);
+        }
+    };
+
     if (loading) return <div style={{ padding: '2rem' }}>Loading dashboard...</div>;
 
     return (
         <div>
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-text-main)' }}>Welcome back, {user?.full_name || 'Student'}! 👋</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-text-main)' }}>Welcome back, {user?.first_name || 'Student'}! 👋</h1>
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>Here's what's happening with your learning today.</p>
             </div>
 
@@ -111,13 +141,31 @@ const DashboardOverview = () => {
                     <div>
                         {data?.recent_activity?.decks?.length > 0 ? (
                             data.recent_activity.decks.map(deck => (
-                                <ActivityItem key={deck.id} icon={BookOpen} title={deck.title} type="Flashcard Deck" time={new Date(deck.created_at).toLocaleDateString()} />
+                                <ActivityItem
+                                    key={deck.id}
+                                    icon={BookOpen}
+                                    title={deck.title}
+                                    type="Flashcard Deck"
+                                    time={new Date(deck.created_at).toLocaleDateString()}
+                                    id={deck.id}
+                                    itemType="deck"
+                                    onReview={handleReview}
+                                />
                             ))
                         ) : (
                             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No recent activity found. Start studying!</div>
                         )}
                         {data?.recent_activity?.concepts?.map(concept => (
-                            <ActivityItem key={concept.id} icon={BrainCircuit} title={concept.title} type="Concept Extraction" time={new Date(concept.created_at).toLocaleDateString()} />
+                            <ActivityItem
+                                key={concept.id}
+                                icon={BrainCircuit}
+                                title={concept.title}
+                                type="Concept Extraction"
+                                time={new Date(concept.created_at).toLocaleDateString()}
+                                id={concept.id}
+                                itemType="concept"
+                                onReview={handleReview}
+                            />
                         ))}
                     </div>
                 </div>

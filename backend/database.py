@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
+from datetime import datetime, date
 
 import os
 from dotenv import load_dotenv
@@ -23,12 +23,14 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    full_name = Column(String)
+    first_name = Column(String)
+    last_name = Column(String)
     hashed_password = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     decks = relationship("Deck", back_populates="owner")
     concepts = relationship("Concept", back_populates="owner")
+    study_activities = relationship("StudyActivity", back_populates="user")
 
 class Deck(Base):
     __tablename__ = "decks"
@@ -63,5 +65,20 @@ class Concept(Base):
 
     owner = relationship("User", back_populates="concepts")
 
+class StudyActivity(Base):
+    __tablename__ = "study_activities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    activity_date = Column(Date, default=date.today)
+    deck_id = Column(Integer, ForeignKey("decks.id"), nullable=True)
+    cards_reviewed = Column(Integer, default=0)
+    easy_count = Column(Integer, default=0)
+    hard_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="study_activities")
+
 def init_db():
     Base.metadata.create_all(bind=engine)
+
