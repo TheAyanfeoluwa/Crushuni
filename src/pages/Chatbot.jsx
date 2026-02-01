@@ -230,33 +230,32 @@ const Chatbot = () => {
                             </div>
                         </div>
                     ) : isPdf && pdfUrl ? (
-                        // Embedded PDF Viewer - hide browser toolbar, use CSS transform for zoom
-                        <div style={{
-                            width: '100%',
-                            height: '100%',
-                            overflow: 'auto',
-                            backgroundColor: '#525659'
-                        }}>
-                            <div style={{
-                                width: pdfZoom >= 100 ? `${pdfZoom}%` : '100%',
-                                height: pdfZoom >= 100 ? `${pdfZoom}%` : '100%',
-                                minWidth: '100%',
-                                minHeight: '100%',
-                                transform: pdfZoom < 100 ? `scale(${pdfZoom / 100})` : 'none',
-                                transformOrigin: 'top left'
-                            }}>
-                                <iframe
-                                    key={pdfUrl} // Stable key based on URL, not zoom
-                                    src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        border: 'none',
-                                        backgroundColor: 'white'
-                                    }}
-                                    title="PDF Viewer"
-                                />
-                            </div>
+                        // Embedded PDF Viewer - using CSS zoom for reliable scaling
+                        <div
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                overflow: 'auto',
+                                backgroundColor: '#525659',
+                                position: 'relative'
+                            }}
+                        >
+                            <iframe
+                                key={pdfUrl}
+                                src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                                style={{
+                                    width: `${10000 / pdfZoom}%`,
+                                    height: `${10000 / pdfZoom}%`,
+                                    border: 'none',
+                                    backgroundColor: 'white',
+                                    transform: `scale(${pdfZoom / 100})`,
+                                    transformOrigin: 'top left',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0
+                                }}
+                                title="PDF Viewer"
+                            />
                         </div>
                     ) : (
                         // Text/Other file viewer with Markdown support

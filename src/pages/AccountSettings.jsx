@@ -1,9 +1,9 @@
 
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { User, Lock, Trash2, Shield, Mail, Key } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Lock, Trash2, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import api from '../lib/axios';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
     <div style={{
@@ -23,12 +23,13 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
     </div>
 );
 
-const InputGroup = ({ label, type = 'text', defaultValue = '', placeholder = '' }) => (
+const InputGroup = ({ label, type = 'text', value, onChange, placeholder = '' }) => (
     <div style={{ marginBottom: '1.25rem' }}>
         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>{label}</label>
         <input
             type={type}
-            defaultValue={defaultValue}
+            value={value}
+            onChange={onChange}
             placeholder={placeholder}
             style={{
                 width: '100%',
@@ -39,21 +40,101 @@ const InputGroup = ({ label, type = 'text', defaultValue = '', placeholder = '' 
                 transition: 'all 0.2s',
                 outline: 'none'
             }}
-            className="input-focus"
         />
-        <style dangerouslySetInnerHTML={{
-            __html: `
-            .input-focus:focus {
-                border-color: var(--color-primary);
-                box-shadow: 0 0 0 2px var(--color-primary-20);
-            }
-        `}} />
     </div>
 );
 
+const StatusMessage = ({ type, message }) => {
+    if (!message) return null;
+    const isSuccess = type === 'success';
+    return (
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.5rem',
+            backgroundColor: isSuccess ? '#ECFDF5' : '#FEF2F2',
+            color: isSuccess ? '#059669' : '#DC2626',
+            marginBottom: '1rem',
+            fontSize: '0.9rem'
+        }}>
+            {isSuccess ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+            {message}
+        </div>
+    );
+};
+
 const AccountSettings = () => {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('profile');
+
+    // Profile form state
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+
+    // Password form state
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+
+    // Initialize form with user data
+    useEffect(() => {
+        if (user) {
+            setFirstName(user.first_name || '');
+            setLastName(user.last_name || '');
+            setEmail(user.email || '');
+        }
+    }, [user]);
+
+    const handleSaveProfile = async () => {
+        setProfileLoading(true);
+        setProfileMessage({ type: '', text: '' });
+
+        try {
+            await api.put('/auth/profile', {
+                first_name: firstName,
+                last_name: lastName,
+                email: email
+            });
+            setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
+        } catch (error) {
+            const msg = error.response?.data?.detail || 'Failed to update profile';
+            setProfileMessage({ type: 'error', text: msg });
+        }
+
+        setProfileLoading(false);
+    };
+
+    const handleUpdatePassword = async () => {
+        if (newPassword !== confirmPassword) {
+            setPasswordMessage({ type: 'error', text: 'New passwords do not match' });
+            return;
+        }
+
+        setPasswordLoading(true);
+        setPasswordMessage({ type: '', text: '' });
+
+        try {
+            await api.put('/auth/password', {
+                current_password: currentPassword,
+                new_password: newPassword
+            });
+            setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error) {
+            const msg = error.response?.data?.detail || 'Failed to update password';
+            setPasswordMessage({ type: 'error', text: msg });
+        }
+
+        setPasswordLoading(false);
+    };
 
     return (
         <div>
@@ -63,26 +144,30 @@ const AccountSettings = () => {
             </div>
 
             <SettingsSection title="Profile Information" icon={User}>
-                <div style={{ flex: 1 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                        <InputGroup label="First Name" defaultValue={user?.first_name || ''} />
-                        <InputGroup label="Last Name" defaultValue={user?.last_name || ''} />
-                    </div>
-                    <InputGroup label="Email Address" type="email" defaultValue={user?.email || ''} />
-                    <div style={{ marginTop: '1rem' }}>
-                        <button className="btn btn-primary">Save Changes</button>
-                    </div>
+                <StatusMessage type={profileMessage.type} message={profileMessage.text} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    <InputGroup label="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <InputGroup label="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                </div>
+                <InputGroup label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <div style={{ marginTop: '1rem' }}>
+                    <button className="btn btn-primary" onClick={handleSaveProfile} disabled={profileLoading}>
+                        {profileLoading ? <><Loader2 size={18} className="animate-spin" style={{ marginRight: '0.5rem' }} /> Saving...</> : 'Save Changes'}
+                    </button>
                 </div>
             </SettingsSection>
 
             <SettingsSection title="Security" icon={Lock}>
-                <InputGroup label="Current Password" type="password" placeholder="••••••••" />
+                <StatusMessage type={passwordMessage.type} message={passwordMessage.text} />
+                <InputGroup label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    <InputGroup label="New Password" type="password" placeholder="New password" />
-                    <InputGroup label="Confirm New Password" type="password" placeholder="Confirm new password" />
+                    <InputGroup label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 8 chars)" />
+                    <InputGroup label="Confirm New Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" />
                 </div>
                 <div style={{ marginTop: '1rem' }}>
-                    <button className="btn btn-secondary">Update Password</button>
+                    <button className="btn btn-secondary" onClick={handleUpdatePassword} disabled={passwordLoading}>
+                        {passwordLoading ? <><Loader2 size={18} className="animate-spin" style={{ marginRight: '0.5rem' }} /> Updating...</> : 'Update Password'}
+                    </button>
                 </div>
             </SettingsSection>
 
@@ -115,8 +200,10 @@ const AccountSettings = () => {
                     </button>
                 </div>
             </div>
+            <style>{`@keyframes spin { 100% { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`}</style>
         </div>
     );
 };
 
 export default AccountSettings;
+

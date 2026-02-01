@@ -141,6 +141,41 @@ def read_users_me(current_user: User = Depends(get_current_user)):
         "last_name": current_user.last_name
     }
 
+class ProfileUpdate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+
+@app.put("/api/auth/profile")
+def update_profile(profile: ProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Check if email is being changed and if it's already taken
+    if profile.email != current_user.email:
+        existing = db.query(User).filter(User.email == profile.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already in use")
+    
+    current_user.first_name = profile.first_name
+    current_user.last_name = profile.last_name
+    current_user.email = profile.email
+    db.commit()
+    db.refresh(current_user)
+    
+    return {"message": "Profile updated successfully", "first_name": current_user.first_name}
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+
+@app.put("/api/auth/password")
+def update_password(passwords: PasswordUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if not verify_password(passwords.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    current_user.hashed_password = get_password_hash(passwords.new_password)
+    db.commit()
+    
+    return {"message": "Password updated successfully"}
+
 # --- Core API (Secured) ---
 
 @app.get("/")
