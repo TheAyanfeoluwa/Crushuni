@@ -16,8 +16,11 @@ const About = () => {
             paddingTop: '8rem',
             paddingBottom: '8rem',
             background: 'var(--color-bg-main)',
+            width: '100%',
+            paddingLeft: '5%',
+            paddingRight: '5%'
         }}>
-            <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{ width: '100%', margin: '0 auto' }}>
                 
                 {/* HERO SECTION */}
                 <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
@@ -69,21 +72,6 @@ const About = () => {
 
                         {/* Bio */}
                         <div>
-                            <span style={{ 
-                                display: 'inline-block', 
-                                padding: '0.25rem 0.75rem', 
-                                borderRadius: '999px', 
-                                background: 'var(--color-primary-subtle)', 
-                                color: 'var(--color-primary)',
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em',
-                                marginBottom: '1rem'
-                            }}>
-                                Meet the Founder
-                            </span>
-                            
                             <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--color-text-main)' }}>
                                 Ayanfeoluwa Peace Ayanlade
                             </h2>
@@ -99,7 +87,7 @@ const About = () => {
                                     Raised in the university town of Ile-Ife, he witnessed the gap between high-level innovation and the daily needs of students. This inspired him to build CrushUni.com, an AI-powered educational platform designed to bridge the resource gap in constrained environments.
                                 </p>
                                 <p style={{ fontSize: '1.1rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
-                                    Ayanfeoluwa is an admitted student to Dartmouth College (Class of 2030), a Non-Trivial Fellow, and an alumnus of the Yale Young Global Scholars program. He single-handedly developed the entire CrushUni architecture to ensure it remains lightweight, fast, and completely free for students everywhere.
+                                    Ayanfeoluwa is a Non-Trivial Fellow and an alumnus of the Yale Young Global Scholars program. He single-handedly developed the entire CrushUni architecture to ensure it remains lightweight, fast, and completely free for students everywhere.
                                 </p>
                             </div>
                         </div>

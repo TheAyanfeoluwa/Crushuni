@@ -7,25 +7,7 @@ import { useLayout } from '../context/LayoutContext';
 
 /* --- UI Components --- */
 
-const Badge = ({ children }) => (
-    <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.375rem',
-        padding: '0.375rem 0.75rem',
-        borderRadius: '999px',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-        border: '1px solid var(--color-border)',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-        fontSize: '0.8rem',
-        fontWeight: '600',
-        color: '#4B5563',
-        marginBottom: '1.5rem',
-        backdropFilter: 'blur(8px)'
-    }}>
-        {children}
-    </div>
-);
+
 
 const BentoCard = ({ children, className = "", style = {}, delay = 0 }) => (
     <motion.div
@@ -66,16 +48,7 @@ const HeroSection = () => {
         }}>
             <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <Badge>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
-                        <span>v2.0 is now live</span>
-                    </Badge>
-                </motion.div>
+
 
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }}
