@@ -145,7 +145,7 @@ const AccountSettings = () => {
 
             <SettingsSection title="Profile Information" icon={User}>
                 <StatusMessage type={profileMessage.type} message={profileMessage.text} />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="grid-responsive-half" style={{ gap: '1.5rem' }}>
                     <InputGroup label="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                     <InputGroup label="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                 </div>
@@ -160,7 +160,7 @@ const AccountSettings = () => {
             <SettingsSection title="Security" icon={Lock}>
                 <StatusMessage type={passwordMessage.type} message={passwordMessage.text} />
                 <InputGroup label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="grid-responsive-half" style={{ gap: '1.5rem' }}>
                     <InputGroup label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 8 chars)" />
                     <InputGroup label="Confirm New Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" />
                 </div>

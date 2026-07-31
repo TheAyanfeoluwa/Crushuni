@@ -256,7 +256,7 @@ const CreateFlashcardDeck = () => {
                 <div className="glass-panel" style={{ padding: '2rem', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}>
 
                     {/* Title & Category Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                    <div className="grid-responsive-half" style={{ gap: '2rem', marginBottom: '2rem' }}>
                         {/* Title Input */}
                         <div>
                             <label style={{ display: 'block', textTransform: 'uppercase', color: 'var(--color-primary)', fontWeight: '700', fontSize: '0.8rem', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>

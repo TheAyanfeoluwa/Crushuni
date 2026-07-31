@@ -131,7 +131,7 @@ const DashboardOverview = () => {
             </div>
 
             {/* Main Content Area */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+            <div className="grid-responsive-dashboard" style={{ gap: '2rem' }}>
                 {/* Recent Activity */}
                 <div style={{ background: 'white', borderRadius: '1rem', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
                     <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

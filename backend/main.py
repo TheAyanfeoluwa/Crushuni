@@ -220,14 +220,21 @@ async def generate_flashcards(
 ):
     if not GENAI_API_KEY:
          raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+         
+    if num_cards > 50 or num_cards <= 0:
+         raise HTTPException(status_code=400, detail="Please request between 1 and 50 flashcards")
 
     try:
         # 1. Read and Extract Text
         content_text = ""
         if file:
             content = await file.read()
+            if not content:
+                 raise HTTPException(status_code=400, detail="Uploaded file is empty")
             content_text = extract_text_from_file(content, file.filename)
         elif text_input:
+            if not text_input.strip():
+                 raise HTTPException(status_code=400, detail="Text input is empty")
             content_text = text_input
         else:
              raise HTTPException(status_code=400, detail="No file or text provided")

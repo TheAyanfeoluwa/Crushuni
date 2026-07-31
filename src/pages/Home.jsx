@@ -58,11 +58,11 @@ const HeroSection = () => {
 
     return (
         <section style={{
-            paddingTop: '5rem',
+            paddingTop: '6rem',
             paddingBottom: '4rem',
             position: 'relative',
             overflow: 'hidden',
-            background: 'radial-gradient(ellipse at 50% 0%, rgba(120, 119, 198, 0.1), transparent 50%)'
+            background: 'var(--color-bg-main)'
         }}>
             <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
 
@@ -139,7 +139,7 @@ const HeroSection = () => {
                         position: 'relative'
                     }}>
                         {/* Browser Chrome */}
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', paddingLeft: '0.5rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', paddingLeft: '0.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444' }} />
                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F59E0B' }} />
                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }} />
@@ -193,7 +193,7 @@ const HeroSection = () => {
                                 </div>
 
                                 {/* Stats Row */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                <div className="grid-responsive-3" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
                                     {['Total Cards', 'Concept Maps', 'Study Streak'].map((label, i) => (
                                         <div key={i} style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                                             <div style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: '600', marginBottom: '0.5rem' }}>{label.toUpperCase()}</div>
@@ -208,7 +208,7 @@ const HeroSection = () => {
                                 {/* Recent Activity Grid - "The Density" */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                     <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#64748B' }}>RECENT STUDY DECKS</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                                    <div className="grid-responsive-2" style={{ gap: '1.5rem' }}>
                                         {[1, 2, 3, 4].map(i => (
                                             <div key={i} style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E2E8F0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                 <div style={{ width: '48px', height: '48px', background: i % 2 === 0 ? '#EFF6FF' : '#F5F3FF', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -254,8 +254,8 @@ const FlipFlashcard = () => {
                 {/* Front */}
                 <div style={{
                     position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
-                    background: 'white', border: '1px solid #E2E8F0', borderRadius: '16px',
-                    boxShadow: '0 20px 40px -5px rgba(0,0,0,0.1)',
+                    background: 'white', border: '1px solid var(--color-border)', borderRadius: '16px',
+                    boxShadow: 'var(--shadow-md)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '1.5rem', textAlign: 'center'
                 }}>
@@ -267,8 +267,8 @@ const FlipFlashcard = () => {
                 {/* Back */}
                 <div style={{
                     position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
-                    background: '#6366F1', borderRadius: '16px', transform: 'rotateY(180deg)',
-                    boxShadow: '0 20px 40px -5px rgba(99, 102, 241, 0.4)',
+                    background: 'var(--color-primary)', borderRadius: '16px', transform: 'rotateY(180deg)',
+                    boxShadow: 'var(--shadow-md)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '1.5rem', textAlign: 'center', color: 'white'
                 }}>
@@ -291,14 +291,12 @@ const FeaturesSection = () => {
                     <p style={{ color: '#64748B', fontSize: '1.2rem' }}>Powerful features packed into one simple platform.</p>
                 </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
+                <div className="grid-responsive-3" style={{
                     gap: '1.5rem',
                     autoRows: 'minmax(300px, auto)'
                 }}>
                     {/* Card 1: AI Tutor */}
-                    <BentoCard style={{ gridColumn: 'span 2', background: 'linear-gradient(145deg, #EFF6FF, #FFFFFF)' }}>
+                    <BentoCard style={{ gridColumn: 'span 2', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}>
                         <div style={{ padding: '2.5rem', display: 'flex', alignItems: 'center', gap: '2rem' }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ width: '3rem', height: '3rem', background: '#DBEAFE', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: '#1D4ED8' }}>
@@ -379,7 +377,7 @@ const WorkflowVisual = ({ step }) => {
     return (
         <div style={{
             background: 'white', borderRadius: '24px', padding: '3rem',
-            boxShadow: '0 50px 100px -20px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0',
+            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--color-border)',
             height: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             position: 'relative', overflow: 'hidden'
         }}>
@@ -445,7 +443,7 @@ const HowItWorks = () => {
             }}
         >
             <div className="container" style={{ paddingTop: '8rem', paddingBottom: '8rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'start' }}>
+                <div className="grid-responsive-half" style={{ gap: '6rem', alignItems: 'start' }}>
 
                     {/* Steps Column */}
                     <div>

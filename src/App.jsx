@@ -11,6 +11,7 @@ import SignIn from './pages/Auth/SignIn';
 import SignUp from './pages/Auth/SignUp';
 import ResetPassword from './pages/Auth/ResetPassword';
 import NotFound from './pages/NotFound';
+import About from './pages/About';
 import DashboardLayout from './components/DashboardLayout';
 import Chatbot from './pages/Chatbot';
 
@@ -70,6 +71,7 @@ function App() {
             <Route path="/" element={<LandingLayout><Home /></LandingLayout>} />
             <Route path="/pricing" element={<LandingLayout><Pricing /></LandingLayout>} />
             <Route path="/faq" element={<LandingLayout><FAQ /></LandingLayout>} />
+            <Route path="/about" element={<LandingLayout><About /></LandingLayout>} />
             <Route path="/login" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />

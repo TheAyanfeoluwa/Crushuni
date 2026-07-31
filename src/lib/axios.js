@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+console.log('Current API Base URL:', baseURL);
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+    baseURL: baseURL,
     // Note: Don't set Content-Type here. Axios auto-detects:
     // - application/json for JSON data
     // - multipart/form-data for FormData (file uploads)

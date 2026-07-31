@@ -28,7 +28,7 @@ const PricingCard = ({ title, price, features }) => (
             fontSize: '0.9rem',
             fontWeight: '800',
             letterSpacing: '0.05em',
-            boxShadow: '0 10px 20px -5px rgba(124, 58, 237, 0.4)'
+            boxShadow: 'var(--shadow-md)'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Sparkles size={16} fill="white" />

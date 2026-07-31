@@ -44,7 +44,7 @@ const SignUp = () => {
 
                 <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {error && <div style={{ color: '#DC2626', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="grid-responsive-half" style={{ gap: '0.75rem' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>First Name</label>
                             <input
